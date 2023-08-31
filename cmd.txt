@@ -1,0 +1,40 @@
+**[create your virtual environment]
+conda create -n dense python=3.8
+conda activate dense
+
+pip install torch==1.13.1+cu117 torchvision==0.14.1+cu117 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu117
+pip install -U openmim
+mim install mmcv-full
+pip install mmsegmentation==0.30.0
+
+pip install timm
+pip install regex
+pip install ftfy
+pip install fvcore
+
+
+**[download pretrain weight]
+cd pretrained
+bash download_clip_models.sh
+cd ..
+
+
+**[dataset download]
+download ADE20k dataset from data.csail.mit.edu/places/ADEchallenge/ADEChallengeData2016.zip
+
+The data structure should be as follows
+
+├──YOUR_LOCAL_PATH   
+│   ├── ade
+│   │   ├── ADEChallengeData2016
+│   │   │   ├── annotations
+│   │   │   │   ├── training
+│   │   │   │   ├── validation
+│   │   │   ├── images
+│   │   │   │   ├── training
+│   │   │   │   ├── validation
+
+
+**[quick implementation]
+change the data_root in configs/_base_/datasets/ade20k_clip.py
+bash dist_train.sh configs/denseclip_fpn_res50_512x512_80k.py 1
