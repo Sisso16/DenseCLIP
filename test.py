@@ -7,7 +7,7 @@ from mmcv.parallel import MMDataParallel, MMDistributedDataParallel
 from mmcv.runner import get_dist_info, init_dist, load_checkpoint
 from mmcv.utils import DictAction
 from mmseg.apis import multi_gpu_test, single_gpu_test
-from mmseg.datasets import build_dataloader, build_dataset
+from mmseg.datasets import build_dataloader, build_dataset, CityscapesDataset
 from mmseg.models import build_segmentor
 
 import denseclip
@@ -117,13 +117,16 @@ def main():
     # build the model and load checkpoint
     cfg.model.train_cfg = None
     if 'DenseCLIP' in cfg.model.type:
-        cfg.model.class_names = list(dataset.CLASSES)
+        cfg.model.class_names = list(('wall', 'building', 'sky', 'floor', 'tree', 'ceiling', 'road', 'bed ', 'windowpane', 'grass', 'cabinet', 'sidewalk', 'person', 'earth', 'door', 'table', 'mountain', 'plant', 'curtain', 'chair', 'car', 'water', 'painting', 'sofa', 'shelf', 'house', 'sea', 'mirror', 'rug', 'field', 'armchair', 'seat', 'fence', 'desk', 'rock', 'wardrobe', 'lamp', 'bathtub', 'railing', 'cushion', 'base', 'box', 'column', 'signboard', 'chest of drawers', 'counter', 'sand', 'sink', 'skyscraper', 'fireplace', 'refrigerator', 'grandstand', 'path', 'stairs', 'runway', 'case', 'pool table', 'pillow', 'screen door', 'stairway', 'river', 'bridge', 'bookcase', 'blind', 'coffee table', 'toilet', 'flower', 'book', 'hill', 'bench', 'countertop', 'stove', 'palm', 'kitchen island', 'computer', 'swivel chair', 'boat', 'bar', 'arcade machine', 'hovel', 'bus', 'towel', 'light', 'truck', 'tower', 'chandelier', 'awning', 'streetlight', 'booth', 'television receiver', 'airplane', 'dirt track', 'apparel', 'pole', 'land', 'bannister', 'escalator', 'ottoman', 'bottle', 'buffet', 'poster', 'stage', 'van', 'ship', 'fountain', 'conveyer belt', 'canopy', 'washer', 'plaything', 'swimming pool', 'stool', 'barrel', 'basket', 'waterfall', 'tent', 'bag', 'minibike', 'cradle', 'oven', 'ball', 'food', 'step', 'tank', 'trade name', 'microwave', 'pot', 'animal', 'bicycle', 'lake', 'dishwasher', 'screen', 'blanket', 'sculpture', 'hood', 'sconce', 'vase', 'traffic light', 'tray', 'ashcan', 'fan', 'pier', 'crt screen', 'plate', 'monitor', 'bulletin board', 'shower', 'radiator', 'glass', 'clock', 'flag'))
 
     model = build_segmentor(cfg.model, test_cfg=cfg.get('test_cfg'))
     checkpoint = load_checkpoint(model, args.checkpoint, map_location='cpu')
+
     model.CLASSES = checkpoint['meta']['CLASSES']
     model.PALETTE = checkpoint['meta']['PALETTE']
 
+    dataset.CLASSES = model.CLASSES
+    dataset.PALETTE = model.PALETTE
 
     # clean gpu memory when starting a new evaluation.
     torch.cuda.empty_cache()
